@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+	android:width="24dp"
+	android:height="24dp"
+	android:viewportWidth="24"
+	android:viewportHeight="24">
+	<!-- The Obsidian Hexagon -->
+	<path
+		android:fillColor="#121212"
+		android:pathData="M12,2L4.5,6.3V17.7L12,22L19.5,17.7V6.3L12,2Z" />
+	<!-- The Steel "C" -->
+	<path
+		android:fillColor="#90A4AE"
+		android:pathData="M15,8.5C14.2,7.6 13.2,7.1 12,7.1C9.3,7.1 7.1,9.3 7.1,12C7.1,14.7 9.3,16.9 12,16.9C13.2,16.9 14.2,16.4 15,15.5L16.5,17C15.3,18.3 13.7,19 12,19C8.1,19 5,15.9 5,12C5,8.1 8.1,5 12,5C13.7,5 15.3,5.7 16.5,7L15,8.5Z" />
+</vector>
+

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ── BRANDING ────────────────────────────────────────── -->
+    <color name="cleanthes_accent">#90A4AE</color>
+    <!-- The missing piece: a darker version of the accent for secondary UI -->
+    <color name="cleanthes_accent_dim">#546E7A</color>
+
+    <color name="cleanthes_black">#000000</color>
+    <color name="cleanthes_surface">#121212</color>
+    <color name="cleanthes_border">#2C2C2C</color>
+    <color name="cleanthes_text_primary">#FFFFFF</color>
+    <color name="cleanthes_text_secondary">#8E8E8E</color>
+    <color name="citadel_gold">#FFB300</color>
+    <color name="citadel_gold_dim">#80FFB300</color>
+    <color name="citadel_gray">#2C2C2C</color>
+
+    <!-- ── UTILITY & STRENGTH ──────────────────────────────── -->
+    <color name="cleanthes_warning">#FFB74D</color>
+    <color name="cleanthes_error">#CF6679</color>
+    <color name="cleanthes_disabled">#424242</color>
+    <color name="cleanthes_strength_empty">#2C2C2C</color>
+    <color name="cleanthes_accent_gold">#FFD700</color>
+
+    <!-- ── LEGACY FALLBACKS (Safety Net) ───────────────────── -->
+    <!-- These prevent failures if any 'vault_' refs are hiding in binary caches -->
+    <color name="vault_error">#CF6679</color>
+    <color name="vault_warning">#FFB74D</color>
+    <color name="vault_accent">#90A4AE</color>
+
+    <!-- ── SYSTEM DEFAULTS ─────────────────────────────────── -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="cleanthes_success">#4CAF50</color>
+    <!-- Fallback for the Java code until it recompiles -->
+    <color name="vault_success">#4CAF50</color>
+    <color name="cleanthes_background">#1A1A1B</color>
+    <color name="cleanthes_foreground_gold">#C5A059</color>
+
+    <!-- Password Strength Meter Colors -->
+    <color name="cleanthes_strength_very_weak">#F44336</color>  <!-- Red -->
+    <color name="cleanthes_strength_weak">#FF9800</color>       <!-- Orange -->
+    <color name="cleanthes_strength_fair">#FFEB3B</color>       <!-- Yellow -->
+    <color name="cleanthes_strength_strong">#8BC34A</color>     <!-- Light Green -->
+    <color name="cleanthes_strength_very_strong">#4CAF50</color> <!-- Green -->
+</resources>
+

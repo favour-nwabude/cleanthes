@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    item_detail_row.xml
+
+    A reusable detail row used inside activity_detail.xml via <include>.
+    Each row shows:
+      - A label (UPPERCASE, secondary color) — e.g. "USERNAME"
+      - A value TextView — e.g. "pepe@gmail.com"
+      - An optional action button (copy, reveal, open URL)
+
+    WHY <include> INSTEAD OF CUSTOM VIEW?
+    The detail screen has 4 identical-looking rows (username, password,
+    website, category). Using <include> with the same layout file keeps
+    the XML DRY. Each included instance gets its own android:id so
+    DetailActivity can find and configure them independently.
+
+    The action button's icon and click behavior is set from DetailActivity
+    in code — the layout just provides the slot.
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="16dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="14dp"
+    android:minHeight="56dp">
+
+    <!-- Row label -->
+    <TextView
+        android:id="@+id/row_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/cleanthes_text_secondary"
+        android:textSize="11sp"
+        android:letterSpacing="0.01"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/row_btn_action"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Row value -->
+    <TextView
+        android:id="@+id/row_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/cleanthes_text_primary"
+        android:textSize="15sp"
+        android:layout_marginTop="3dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/row_btn_action"
+        app:layout_constraintTop_toBottomOf="@id/row_label"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Action Button -->
+    <ImageButton
+        android:id="@+id/row_btn_action"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_copy"
+        android:tint="@color/cleanthes_text_secondary"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Secondary action button -->
+    <ImageButton
+        android:id="@+id/row_btn_secondary"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_eye_off"
+        android:tint="@color/cleanthes_text_secondary"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:visibility="gone"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintEnd_toStartOf="@id/row_btn_action"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+

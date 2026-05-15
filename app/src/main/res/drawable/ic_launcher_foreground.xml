@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+        Clean padlock. Two paths.
+        Shackle: hollow U arch centered at x=54
+        Body: rounded rectangle
+        No keyhole — detail is lost at 48dp launcher size anyway.
+        Color: #C5A059 — same gold used throughout the app.
+    -->
+
+    <!-- Shackle -->
+    <path
+        android:fillColor="#C5A059"
+        android:pathData="M 40,60 L 40,44 C 40,30 68,30 68,44 L 68,60 L 61,60 L 61,46 C 61,36 47,36 47,46 L 47,60 Z" />
+
+    <!-- Body -->
+    <path
+        android:fillColor="#C5A059"
+        android:pathData="M 30,58 Q 30,54 34,54 L 74,54 Q 78,54 78,58 L 78,90 Q 78,94 74,94 L 34,94 Q 30,94 30,90 Z" />
+
+</vector>

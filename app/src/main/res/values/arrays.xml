@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    home_strings.xml
+
+    All user-facing strings for the home screen.
+    Follows the same naming convention as auth_strings.xml:
+    home_*     → home screen strings
+    category_* → built-in category names
+-->
+<resources>
+
+    <!-- TOOLBAR -->
+    <string name="home_entries_count_singular">%d entry</string>
+    <string name="home_entries_count_plural">%d entries</string>
+    <string name="home_btn_search_desc">Search Vault</string>
+    <string name="home_btn_lock_desc">Lock Vault</string>
+
+    <!-- SEARCH -->
+    <string name="home_search_no_results">No entries match your search</string>
+
+    <!-- EMPTY STATE -->
+    <string name="home_empty_body">Tap the + button to save your first password</string>
+
+    <!-- SNACKBAR MESSAGES -->
+    <string name="home_deleted_entry">"%s" deleted</string>
+    <string name="home_undo">UNDO</string>
+    <string name="home_session_expired">Session expired. Please Unlock again.</string>
+
+    <!-- BUILT-IN CATEGORIES -->
+    <string name="category_all">All</string>
+    <string name="category_general">General</string>
+    <string name="category_banking">Banking</string>
+    <string name="category_social">Social</string>
+    <string name="category_work">Work</string>
+    <string name="category_shopping">Shopping</string>
+    <string name="category_health">Health</string>
+    <string name="category_tech">Tech</string>
+    <string name="category_personal">Personal</string>
+
+    <!-- CATEGORY ARRAY -->
+    <string-array name="categories_array">
+        <item>General</item>
+        <item>Banking</item>
+        <item>Social</item>
+        <item>Work</item>
+        <item>Shopping</item>
+        <item>Health</item>
+        <item>Tech</item>
+        <item>Personal</item>
+        <item>Entertainment</item>
+        <item>Travel</item>
+        <item>Finance</item>
+    </string-array>
+
+</resources>
+
+
+
+

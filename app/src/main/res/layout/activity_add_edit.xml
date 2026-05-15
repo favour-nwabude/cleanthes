@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<!--
+    activity_add_edit.xml
+
+    The form screen for creating a new vault entry or editing an existing one.
+    The same layout serves both create and edit modes —
+    AddEditActivity detects the mode by checking for an EXTRA_ENTRY_ID intent extra.
+
+    LAYOUT STRUCTURE:
+    ScrollView (allows scroll on small screens — form can be tall)
+      └── ConstraintLayout
+            ├── Custom toolbar      (back button + screen title + save button)
+            ├── Title field         (required)
+            ├── Username field      (required)
+            ├── Password field      (required — with show/hide toggle)
+            ├── Generate button     (launches generator dialog)
+            ├── Strength bar        (same 5-segment bar from setup)
+            ├── Website field       (optional)
+            ├── Category spinner    (dropdown from categories_array)
+            ├── Notes field         (optional, multi-line)
+            ├── Favorite toggle     (star checkbox)
+            └── Save / Delete buttons
+-->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cleanthes_black"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="40dp">
+
+        <!-- TOOLBAR -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/addedit_toolbar"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Back Button -->
+            <ImageButton
+                android:id="@+id/addedit_btn_back"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:src="@drawable/ic_arrow_back"
+                android:tint="@color/cleanthes_text_primary"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Go back"
+                android:padding="10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <!-- Screen Title -->
+            <TextView
+                android:id="@+id/addedit_tv_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="New entry"
+                android:textColor="@color/cleanthes_text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:letterSpacing="0.1"
+                android:layout_marginStart="4dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/addedit_btn_back"
+                app:layout_constraintEnd_toStartOf="@id/addedit_btn_save" />
+
+            <!-- Save button -->
+            <Button
+                android:id="@+id/addedit_btn_save"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="@string/addedit_btn_save"
+                android:textColor="@color/cleanthes_black"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:backgroundTint="@color/citadel_gold"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Toolbar Separator -->
+        <View
+            android:id="@+id/addedit_toolbar_divider"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/cleanthes_border"
+            app:layout_constraintTop_toBottomOf="@id/addedit_toolbar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- ── FORM FIELDS ────────────────────────────────── -->
+        <!-- Shared horizontal padding via parent paddingStart/End not available
+             on ConstraintLayout children individually — using marginStart/End -->
+
+        <!-- TITLE -->
+        <TextView
+            android:id="@+id/addedit_label_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="TITLE *"
+            android:textColor="@color/cleanthes_text_secondary"
+            android:textSize="11sp"
+            android:letterSpacing="0.1"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/addedit_toolbar_divider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/addedit_container_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_input_field"
+            app:layout_constraintTop_toBottomOf="@id/addedit_label_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <EditText
+                android:id="@+id/addedit_et_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/addedit_hint_title"
+                android:textColorHint="@color/cleanthes_disabled"
+                android:textColor="@color/cleanthes_text_primary"
+                android:textSize="15sp"
+                android:inputType="textCapSentences"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="13dp"
+                android:paddingBottom="13dp"
+                android:background="@null"
+                android:imeOptions="actionNext"
+                android:maxLines="1" />
+        </FrameLayout>
+
+        <!-- Username -->
+        <TextView
+            android:id="@+id/addedit_label_username"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="USERNAME | EMAIL"
+            android:textColor="@color/cleanthes_text_secondary"
+            android:textSize="11sp"
+            android:letterSpacing="0.1"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="18dp"
+            app:layout_constraintTop_toBottomOf="@id/addedit_container_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/addedit_container_username"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_input_field"
+            app:layout_constraintTop_toBottomOf="@id/addedit_label_username"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <EditText
+                android:id="@+id/addedit_et_username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/addedit_hint_username"
+                android:textColorHint="@color/cleanthes_disabled"
+                android:textColor="@color/cleanthes_text_primary"
+                android:textSize="15sp"
+                android:inputType="textEmailAddress"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="13sp"
+                android:paddingBottom="13sp"
+                android:background="@null"
+                android:imeOptions="actionNext"
+                android:maxLines="1" />
+        </FrameLayout>
+
+        <!-- Password -->
+        <TextView
+            android:id="@+id/addedit_label_password"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="PASSWORD *"
+            android:textColor="@color/cleanthes_text_secondary"
+            android:textSize="11sp"
+            android:letterSpacing="0.1"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="18dp"
+            app:layout_constraintTop_toBottomOf="@id/addedit_container_username"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/addedit_container_password"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_input_field"
+            app:layout_constraintTop_toBottomOf="@id/addedit_label_password"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <EditText
+                android:id="@+id/addedit_et_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/addedit_hint_password"
+                android:textColorHint="@color/cleanthes_disabled"
+                android:textColor="@color/cleanthes_text_primary"
+                android:textSize="15sp"
+                android:inputType="textPassword"
+                android:paddingStart="14dp"
+                android:paddingEnd="96dp"
+                android:paddingTop="13sp"
+                android:paddingBottom="13sp"
+                android:background="@null"
+                android:imeOptions="actionNext"
+                android:maxLines="1" />
+
+            <ImageButton
+                android:id="@+id/addedit_btn_toggle_password"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="end | center_vertical"
+                android:src="@drawable/ic_eye_off"
+                android:tint="@color/cleanthes_text_secondary"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Toggle password visibility"
+                android:padding="12dp" />
+        </FrameLayout>
+
+        <!-- Generate Button -->
+        <Button
+            android:id="@+id/addedit_btn_generate"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:text="@string/addedit_btn_generate"
+            android:textColor="@color/cleanthes_black"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.15"
+            android:backgroundTint="@color/citadel_gold"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/addedit_container_password"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Strength bar(5 segments) -->
+        <LinearLayout
+            android:id="@+id/addedit_strength_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            app:layout_constraintTop_toBottomOf="@id/addedit_btn_generate"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <View
+                android:id="@+id/addedit_seg1"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:layout_weight="1"
+                android:background="@color/cleanthes_strength_empty"
+                android:layout_marginEnd="3dp" />
+
+            <View
+                android:id="@+id/addedit_seg2"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:layout_weight="1"
+                android:background="@color/cleanthes_strength_empty"
+                android:layout_marginEnd="3dp" />
+
+            <View
+                android:id="@+id/addedit_seg3"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:layout_weight="1"
+                android:background="@color/cleanthes_strength_empty"
+                android:layout_marginEnd="3dp" />
+
+            <View
+                android:id="@+id/addedit_seg4"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:layout_weight="1"
+                android:background="@color/cleanthes_strength_empty"
+                android:layout_marginEnd="3dp" />
+
+            <View
+                android:id="@+id/addedit_seg5"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:layout_weight="1"
+                android:background="@color/cleanthes_strength_empty" />
+
+        </LinearLayout>
+        <!--
+        Website -->
+        <TextView
+            android:id="@+id/addedit_label_website"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="WEBSITE (OPTIONAL)"
+            android:textColor="@color/cleanthes_text_secondary"
+            android:textSize="11sp"
+            android:letterSpacing="0.1"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="18dp"
+            app:layout_constraintTop_toBottomOf="@id/addedit_strength_bar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/addedit_container_website"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_input_field"
+            app:layout_constraintTop_toBottomOf="@id/addedit_label_website"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <EditText
+                android:id="@+id/addedit_et_website"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/addedit_hint_website"
+                android:textColorHint="@color/cleanthes_disabled"
+                android:textColor="@color/cleanthes_text_primary"
+                android:textSize="15sp"
+                android:inputType="textUri"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="13dp"
+                android:paddingBottom="13dp"
+                android:background="@null"
+                android:imeOptions="actionNext"
+                android:maxLines="1" />
+        </FrameLayout>
+
+        <!-- Category -->
+        <TextView
+            android:id="@+id/addedit_label_category"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="CATEGORY"
+            android:textColor="@color/cleanthes_text_secondary"
+            android:textSize="11sp"
+            android:letterSpacing="0.1"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="18dp"
+            app:layout_constraintTop_toBottomOf="@id/addedit_container_website"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <Spinner
+            android:id="@+id/addedit_spinner_category"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_input_field"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:entries="@array/categories_array"
+            app:layout_constraintTop_toBottomOf="@id/addedit_label_category"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Notes -->
+        <TextView
+            android:id="@+id/addedit_label_notes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="NOTES (OPTIONAL)"
+            android:textColor="@color/cleanthes_text_secondary"
+            android:textSize="11sp"
+            android:letterSpacing="0.1"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="18dp"
+            app:layout_constraintTop_toBottomOf="@id/addedit_spinner_category"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/addedit_container_notes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_input_field"
+            app:layout_constraintTop_toBottomOf="@id/addedit_label_notes"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <EditText
+                android:id="@+id/addedit_et_notes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/addedit_hint_notes"
+                android:textColorHint="@color/cleanthes_disabled"
+                android:textColor="@color/cleanthes_text_primary"
+                android:textSize="14sp"
+                android:inputType="textMultiLine | textCapSentences"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:background="@null"
+                android:minLines="3"
+                android:maxLines="6"
+                android:gravity="top | start" />
+        </FrameLayout>
+
+        <!-- Favorite toggle -->
+        <CheckBox
+            android:id="@+id/addedit_checkbox_favorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/addedit_checkbox_favorite"
+            android:textColor="@color/cleanthes_text_secondary"
+            android:textSize="14sp"
+            android:buttonTint="@color/citadel_gold"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/addedit_container_notes"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Error Message -->
+        <TextView
+            android:id="@+id/addedit_tv_error"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@color/cleanthes_error"
+            android:textSize="13sp"
+            android:visibility="gone"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/addedit_checkbox_favorite"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Delete Button -->
+        <Button
+            android:id="@+id/btn_delete"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="@string/addedit_btn_delete"
+            android:textColor="@color/cleanthes_error"
+            android:textSize="14sp"
+            android:backgroundTint="@color/cleanthes_surface"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="28dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/addedit_tv_error"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

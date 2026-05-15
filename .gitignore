@@ -1,0 +1,34 @@
+# Android build artifacts
+build/
+app/build/
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradlew
+!gradlew.bat
+
+# Local configuration — never commit this
+local.properties
+
+# IDE files
+.idea/
+*.iml
+.DS_Store
+captures/
+
+# Keystore files — NEVER commit signing keys
+*.jks
+*.keystore
+
+# Generated files
+gen/
+out/
+
+# APK and AAB outputs
+*.apk
+*.aab
+
+# Logs
+*.log

@@ -1,0 +1,19 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme -->
+    <style name="Theme.Cleanthes" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- Core Branding -->
+        <item name="colorPrimary">@color/cleanthes_accent</item>
+        <item name="colorOnPrimary">@color/cleanthes_black</item>
+        <item name="colorSecondary">@color/cleanthes_accent_dim</item>
+        <item name="colorSurface">@color/cleanthes_surface</item>
+
+        <!-- Status and Nav Bars -->
+        <item name="android:windowBackground">@color/cleanthes_black</item>
+        <item name="android:statusBarColor">@color/cleanthes_black</item>
+        <item name="android:navigationBarColor">@color/cleanthes_black</item>
+
+        <!-- UI Components -->
+        <item name="colorError">@color/cleanthes_error</item>
+    </style>
+</resources>
+

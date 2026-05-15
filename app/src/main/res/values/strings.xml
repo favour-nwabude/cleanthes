@@ -1,0 +1,72 @@
+<resources>
+    <!-- App Branding -->
+    <string name="app_name">Cleanthes</string>
+    <string name="app_brand">FAVOURDEVLABS</string>
+
+    <!-- Setup Screen (activity_setup.xml) -->
+    <string name="setup_title">Your Inner Citadel</string>
+    <string name="setup_memento_mori">memento mori</string>
+    <string name="setup_warning_title">NO RECOVERY. NO REGRETS.</string>
+    <string name="setup_warning_body">Lose this password and your data returns to the void —
+        permanently.\n\nThis is not a flaw. It is a feature. It protects you from everyone,
+        including us.\n\nNo backdoors. No support ticket. No second chance.</string>
+    <string name="setup_warning_acknowledge">I understand. There is no recovery.</string>
+    <string name="setup_label_password">Master Password</string>
+    <string name="hint_master_password">Guard the gate</string>
+    <string name="setup_label_confirm">Confirm Master Password</string>
+    <string name="hint_confirm_password">Speak it again. Without doubt.</string>
+    <string name="setup_btn_create">FORTIFY</string>
+
+    <!-- Login Screen (activity_login.xml) -->
+    <string name="login_subtitle">The gate does not ask twice.</string>
+    <string name="login_label_password">Unlock Vault</string>
+    <string name="login_btn_unlock">AUTHENTICATE</string>
+    <string name="login_biometric_hint">Tap sensor to unlock</string>
+
+    <!-- Accessibility & UI Utility -->
+    <string name="cd_cleanthes_logo">Cleanthes App Logo</string>
+    <string name="cd_fingerprint_icon">Biometric Authentication Icon</string>
+    <string name="cd_toggle_password_visibility">Show or hide password</string>
+    <string name="toggle_password_visibility">Toggle visibility</string>
+
+    <!-- Material / System -->
+    <string name="appbar_scrolling_view_behavior" translatable="false">
+        com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
+
+    <!-- Error Messages -->
+    <string name="error_generic">An unexpected error occurred</string>
+    <string name="error_wrong_password">Incorrect Master Password</string>
+    <string name="login_attempts_remaining">%d attempts remaining</string>
+    <string name="login_locked_out">Locked for %d seconds</string>
+    <string name="error_password_too_short">Password is too short</string>
+    <string name="error_password_no_number">Password must contain a number</string>
+    <string name="error_password_no_special">Password must contain a special character</string>
+    <string name="error_passwords_no_match">Passwords do not match</string>
+    <string name="error_setup_failed">Failed to initialize vault</string>
+
+    <!-- Home Screen -->
+    <string name="home_empty_title">The vault stands empty.</string>
+    <string name="home_empty_subtitle">One secret at a time. Begin.</string>
+    <string name="home_search_hint">Search the citadel</string>
+
+
+    <!-- Add/Edit Screen -->
+    <string name="addedit_title_new">New Entry</string>
+    <string name="addedit_title_edit">Edit Entry</string>
+    <string name="addedit_hint_title">Gmail, GitHub, Netflix</string>
+    <string name="addedit_hint_username">username or email</string>
+    <string name="addedit_hint_password">Set the combination</string>
+    <string name="addedit_hint_website">https://example.com</string>
+    <string name="addedit_hint_notes">Answers, PINs, anything else</string>
+    <string name="addedit_btn_save">COMMIT</string>
+    <string name="addedit_btn_generate">FORGE</string>
+    <string name="addedit_btn_delete">ERASE ENTRY</string>
+    <string name="addedit_checkbox_favorite">Mark as priority</string>
+
+    <!-- Password Strength Labels -->
+    <string name="cleanthes_strength_very_weak">Extremely Vulnerable</string>
+    <string name="cleanthes_strength_weak">Weak</string>
+    <string name="cleanthes_strength_fair">Fair</string>
+    <string name="cleanthes_strength_strong">Strong</string>
+    <string name="cleanthes_strength_very_strong">Impenetrable</string>
+</resources>

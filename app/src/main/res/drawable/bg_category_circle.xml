@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    bg_category_circle.xml
+
+    The circular background for the category initial icon
+    on each vault entry row in the RecyclerView.
+
+    The fill color is set programmatically in VaultEntryAdapter
+    via setBackgroundTintList() — so the color defined here
+    is just the default fallback. What matters is the oval shape.
+
+    USAGE IN ADAPTER:
+        tvCategoryIcon.setBackgroundTintList(
+            ColorStateList.valueOf(getCategoryColor(entry.getCategory()))
+        );
+
+    This tints the oval to the category color while keeping
+    the shape definition here in XML. Clean separation.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- Default color — overridden at runtime by the adapter -->
+    <solid android:color="#2E86AB" />
+
+</shape>
+
