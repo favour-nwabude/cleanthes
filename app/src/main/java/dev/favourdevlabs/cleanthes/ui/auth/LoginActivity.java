@@ -53,12 +53,11 @@ public class LoginActivity extends AppCompatActivity {
     private String storedEncSalt;
     private String storedMasterHash;
     private boolean biometricEnabled;
+    private String storedBiometricSecret;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-       getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
         setContentView(R.layout.activity_login);
 
@@ -101,15 +100,22 @@ public class LoginActivity extends AppCompatActivity {
             storedEncSalt = prefs.getString(SetupActivity.KEY_ENC_SALT, null);
             storedMasterHash = prefs.getString(SetupActivity.KEY_MASTER_HASH, null);
             biometricEnabled = prefs.getBoolean(SetupActivity.KEY_BIOMETRIC_ENABLED, false);
+            storedBiometricSecret = prefs.getString(SetupActivity.KEY_BIOMETRIC_SECRET, null);
         } catch (Exception e) {
             storedAuthSalt = null;
             storedEncSalt = null;
             storedMasterHash = null;
             biometricEnabled = false;
+            storedBiometricSecret = null;
         }
     }
 
     private void bindViews() {
+        if (!biometricEnabled || !BiometricHelper.isBiometricAvailable(this)) {
+            divider.setVisibility(View.GONE);
+            tvBiometricHint.setVisibility(View.GONE);
+            btnBiometric.setVisibility(View.GONE);
+        }
         etPassword = findViewById(R.id.login_et_password);
         btnTogglePassword = findViewById(R.id.login_btn_toggle_password);
         tvError = findViewById(R.id.login_tv_error);
@@ -216,15 +222,9 @@ public class LoginActivity extends AppCompatActivity {
                 SecretKey sessionKey;
 
                 if (fromBiometric) {
-                    sessionKey = SessionManager.getSessionKey();
-                    if (sessionKey == null) {
-                        runOnUiThread(() -> {
-                            setLoadingState(false);
-                            showError("Please enter your master password to unlock");
-                            setVisibility(View.GONE, divider, tvBiometricHint, btnBiometric);
-                        });
-                        return;
-                    }
+                    byte[] saltBytes = android.util.Base64.decode(storedEncSalt, android.util.Base64.DEFAULT);
+                    sessionKey = KeyDerivation.deriveKey(storedBiometricSecret.toCharArray(), saltBytes);
+                    SessionManager.setSessionKey(sessionKey);
                 } else {
                     byte[] saltBytes = android.util.Base64.decode(storedEncSalt, android.util.Base64.DEFAULT);
                     sessionKey = KeyDerivation.deriveKey(masterPassword.toCharArray(), saltBytes);

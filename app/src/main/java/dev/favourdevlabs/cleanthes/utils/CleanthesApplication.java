@@ -3,6 +3,7 @@ package dev.favourdevlabs.cleanthes.utils;
 import android.app.Application;
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.WindowManager;
 
 import dev.favourdevlabs.cleanthes.ui.auth.SessionManager;
 import dev.favourdevlabs.cleanthes.utils.ClipboardHelper;
@@ -35,6 +36,10 @@ public class CleanthesApplication extends Application {
 
         @Override
         public void onActivityCreated(Activity a, Bundle b) {
+           a.getWindow().setFlags(
+           WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+         );
         }
 
         @Override

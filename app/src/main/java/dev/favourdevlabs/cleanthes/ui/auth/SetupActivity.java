@@ -35,6 +35,7 @@ public class SetupActivity extends AppCompatActivity {
     public static final String KEY_ENC_SALT = "enc_salt";
     public static final String KEY_MASTER_HASH = "master_hash";
     public static final String KEY_BIOMETRIC_ENABLED = "biometric_enabled";
+    public static final String KEY_BIOMETRIC_SECRET = "biometric_secret";
 
     public static final int MIN_PASSWORD_LENGTH = 8;
     public static final int MAX_FAILED_ATTEMPTS = 5;
@@ -65,10 +66,7 @@ public class SetupActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,
-                WindowManager.LayoutParams.FLAG_SECURE);
-
-                // Vault guard — if vault already exists, never show setup again
+        // Vault guard — if vault already exists, never show setup again
         try {
             SharedPreferences vaultCheck = getEncryptedPrefs();
             if (vaultCheck.getBoolean(KEY_VAULT_EXISTS, false)) {
@@ -78,7 +76,8 @@ public class SetupActivity extends AppCompatActivity {
                 finish();
                 return;
             }
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
 
         setContentView(R.layout.activity_setup);
 
@@ -204,7 +203,8 @@ public class SetupActivity extends AppCompatActivity {
                     .putString(KEY_ENC_SALT, encSalt)
                     // Get the hash string from the object
                     .putString(KEY_MASTER_HASH, storedHash.hashBase64)
-                    .putBoolean(KEY_BIOMETRIC_ENABLED, false)
+                    .putBoolean(KEY_BIOMETRIC_ENABLED, true)
+                    .putString(KEY_BIOMETRIC_SECRET, masterPassword)
                     .apply();
 
             runOnUiThread(this::navigateHome);
