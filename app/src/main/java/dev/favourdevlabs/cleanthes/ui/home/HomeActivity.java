@@ -27,6 +27,7 @@ import dev.favourdevlabs.cleanthes.ui.addedit.AddEditActivity;
 import dev.favourdevlabs.cleanthes.ui.auth.LoginActivity;
 import dev.favourdevlabs.cleanthes.ui.auth.SessionManager;
 import dev.favourdevlabs.cleanthes.ui.detail.DetailActivity;
+import dev.favourdevlabs.cleanthes.ui.settings.SettingsActivity;
 
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
     private TextView tvEntryCount;
     private ImageButton btnSearch;
     private ImageButton btnLock;
+    private ImageButton btnSettings;
     private FloatingActionButton fabAdd;
     private View rootView;
 
@@ -90,6 +92,7 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
         emptyState = findViewById(R.id.home_empty_state);
         tvEntryCount = findViewById(R.id.home_tv_entry_count);
         btnSearch = findViewById(R.id.home_btn_search);
+        btnSettings = findViewById(R.id.home_btn_settings);
         btnLock = findViewById(R.id.home_btn_lock);
         fabAdd = findViewById(R.id.home_fab_add);
         rootView = findViewById(android.R.id.content);
@@ -192,6 +195,8 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
         });
 
         btnSearch.setOnClickListener(v -> toggleSearchBar());
+        btnSettings.setOnClickListener(
+                v -> startActivity(new Intent(this, SettingsActivity.class)));
 
         btnLock.setOnClickListener(v -> lockVault());
 

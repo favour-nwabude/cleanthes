@@ -15,5 +15,12 @@
         <!-- UI Components -->
         <item name="colorError">@color/cleanthes_error</item>
     </style>
+    <!-- Transparent theme for AutofillAuthActivity -->
+    <style name="Theme.Cleanthes.Transparent" parent="Theme.Cleanthes">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>
 

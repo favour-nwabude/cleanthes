@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:background="@color/cleanthes_black">
+
+	<!-- Toolbar -->
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="56dp"
+		android:orientation="horizontal"
+		android:gravity="center_vertical"
+		android:paddingStart="16dp"
+		android:paddingEnd="16dp">
+
+		<ImageView
+			android:id="@+id/btn_back"
+			android:layout_width="24dp"
+			android:layout_height="24dp"
+			android:src="@drawable/ic_arrow_back"
+			android:tint="@color/cleanthes_text_primary" />
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="16dp"
+			android:text="Settings"
+			android:textColor="@color/cleanthes_text_primary"
+			android:textSize="18sp"
+			android:letterSpacing="0.05"
+			android:fontFamily="monospace" />
+	</LinearLayout>
+
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="1dp"
+		android:background="@color/cleanthes_border" />
+
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:paddingTop="24dp">
+
+			<!-- ─── VAULT ─────────────────────────────── -->
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingStart="16dp"
+				android:paddingEnd="16dp"
+				android:paddingBottom="8dp"
+				android:text="VAULT"
+				android:textColor="@color/cleanthes_accent"
+				android:textSize="11sp"
+				android:letterSpacing="0.15"
+				android:fontFamily="monospace" />
+
+			<!-- Auto-lock row -->
+			<LinearLayout
+				android:id="@+id/row_auto_lock"
+				android:layout_width="match_parent"
+				android:layout_height="56dp"
+				android:orientation="horizontal"
+				android:gravity="center_vertical"
+				android:paddingStart="16dp"
+				android:paddingEnd="16dp"
+				android:background="?attr/selectableItemBackground">
+
+				<TextView
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:text="Auto-lock after"
+					android:textColor="@color/cleanthes_text_primary"
+					android:textSize="15sp" />
+
+				<TextView
+					android:id="@+id/value_auto_lock"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="5 min"
+					android:textColor="@color/cleanthes_text_secondary"
+					android:textSize="15sp" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="4dp"
+					android:text="›"
+					android:textColor="@color/cleanthes_text_secondary"
+					android:textSize="18sp" />
+			</LinearLayout>
+
+			<View
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:layout_marginStart="16dp"
+				android:background="@color/cleanthes_border" />
+
+			<!-- Clipboard row -->
+			<LinearLayout
+				android:id="@+id/row_clipboard"
+				android:layout_width="match_parent"
+				android:layout_height="56dp"
+				android:orientation="horizontal"
+				android:gravity="center_vertical"
+				android:paddingStart="16dp"
+				android:paddingEnd="16dp"
+				android:background="?attr/selectableItemBackground">
+
+				<TextView
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:text="Clear clipboard after"
+					android:textColor="@color/cleanthes_text_primary"
+					android:textSize="15sp" />
+
+				<TextView
+					android:id="@+id/value_clipboard"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="30s"
+					android:textColor="@color/cleanthes_text_secondary"
+					android:textSize="15sp" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="4dp"
+					android:text="›"
+					android:textColor="@color/cleanthes_text_secondary"
+					android:textSize="18sp" />
+			</LinearLayout>
+
+			<!-- ─── AUTOFILL ────────────────────────────── -->
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingStart="16dp"
+				android:paddingEnd="16dp"
+				android:paddingTop="28dp"
+				android:paddingBottom="8dp"
+				android:text="AUTOFILL"
+				android:textColor="@color/cleanthes_accent"
+				android:textSize="11sp"
+				android:letterSpacing="0.15"
+				android:fontFamily="monospace" />
+
+			<LinearLayout
+				android:id="@+id/row_autofill"
+				android:layout_width="match_parent"
+				android:layout_height="56dp"
+				android:orientation="horizontal"
+				android:gravity="center_vertical"
+				android:paddingStart="16dp"
+				android:paddingEnd="16dp"
+				android:background="?attr/selectableItemBackground">
+
+				<TextView
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:text="Provider"
+					android:textColor="@color/cleanthes_text_primary"
+					android:textSize="15sp" />
+
+				<TextView
+					android:id="@+id/autofill_status_text"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:textSize="15sp" />
+			</LinearLayout>
+
+		</LinearLayout>
+	</ScrollView>
+</LinearLayout>
