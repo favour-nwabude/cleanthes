@@ -17,10 +17,13 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.util.Base64;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.security.crypto.MasterKey;
 
 import dev.favourdevlabs.cleanthes.R;
@@ -62,11 +65,25 @@ public class SetupActivity extends AppCompatActivity {
     private boolean passwordVisible = false;
     private boolean confirmVisible = false;
 
+    private final Handler splashHandler = new Handler(Looper.getMainLooper());
+    private boolean splashDone = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Must be first — before super.onCreate()
+        SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
+        splashScreen.setKeepOnScreenCondition(() -> !splashDone);
+
         super.onCreate(savedInstanceState);
 
-        // Vault guard — if vault already exists, never show setup again
+        // Hold the splash for 2000ms, then route
+        splashHandler.postDelayed(this::onSplashComplete, 2000);
+    }
+
+    private void onSplashComplete() {
+        splashDone = true;
+
+        // Vault guard — if vault exists, go to login
         try {
             SharedPreferences vaultCheck = getEncryptedPrefs();
             if (vaultCheck.getBoolean(KEY_VAULT_EXISTS, false)) {
@@ -79,10 +96,16 @@ public class SetupActivity extends AppCompatActivity {
         } catch (Exception ignored) {
         }
 
+        // New install — reveal the setup screen
         setContentView(R.layout.activity_setup);
-
         bindViews();
         attachListeners();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        splashHandler.removeCallbacksAndMessages(null);
     }
 
     private void bindViews() {

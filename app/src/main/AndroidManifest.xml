@@ -13,22 +13,16 @@
         android:supportsRtl="true">
 
         <activity
-            android:name=".ui.auth.SplashActivity"
+            android:name=".ui.auth.SetupActivity"
             android:exported="true"
             android:theme="@style/Theme.Cleanthes.SplashScreen"
+            android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
-        <activity
-            android:name=".ui.auth.SetupActivity"
-            android:exported="true"
-            android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="portrait" />
 
         <activity
             android:name=".ui.auth.LoginActivity"
