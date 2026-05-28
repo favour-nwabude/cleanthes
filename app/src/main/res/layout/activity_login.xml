@@ -215,6 +215,49 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Accent rule — same width as splash, consistent visual language -->
+    <View
+        android:id="@+id/login_quote_divider"
+        android:layout_width="40dp"
+        android:layout_height="1dp"
+        android:background="@color/cleanthes_accent"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@id/login_tv_quote"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Stoic quote -->
+    <TextView
+        android:id="@+id/login_tv_quote"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="The willing are led by fate;\nthe unwilling are dragged."
+        android:textColor="@color/cleanthes_text_secondary"
+        android:textSize="13sp"
+        android:fontFamily="sans-serif-light"
+        android:textStyle="italic"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.4"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@id/login_tv_quote_attribution"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Attribution -->
+    <TextView
+        android:id="@+id/login_tv_quote_attribution"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="— Cleanthes of Assos"
+        android:textColor="@color/cleanthes_accent_dim"
+        android:textSize="11sp"
+        android:letterSpacing="0.08"
+        android:fontFamily="sans-serif"
+        android:layout_marginBottom="14dp"
+        app:layout_constraintBottom_toTopOf="@id/login_tv_brand"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Brand footer — pinned to screen bottom, consistent with setup -->
     <TextView
         android:id="@+id/login_tv_brand"
