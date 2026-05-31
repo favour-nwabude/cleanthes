@@ -1,17 +1,22 @@
 package dev.favourdevlabs.cleanthes.ui.home;
 
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.annotation.NonNull;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -31,32 +36,31 @@ import dev.favourdevlabs.cleanthes.ui.settings.SettingsActivity;
 
 import java.util.List;
 
-public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter.OnEntryClickListener {
+public class HomeActivity extends AppCompatActivity
+        implements VaultEntryAdapter.OnEntryClickListener {
 
     public static final String EXTRA_ENTRY_ID = "extra_entry_id";
 
-    private RecyclerView recyclerView;
-    private VaultEntryAdapter adapter;
-    private HomeViewModel viewModel;
-    private SearchView searchView;
-    private ChipGroup chipGroup;
-    private View emptyState;
-    private TextView tvEntryCount;
-    private ImageButton btnSearch;
-    private ImageButton btnLock;
-    private ImageButton btnSettings;
-    private FloatingActionButton fabAdd;
-    private View rootView;
+    private RecyclerView          recyclerView;
+    private VaultEntryAdapter     adapter;
+    private HomeViewModel         viewModel;
+    private SearchView            searchView;
+    private ChipGroup             chipGroup;
+    private View                  emptyState;
+    private TextView              tvEntryCount;
+    private ImageButton           btnSearch;
+    private ImageButton           btnLock;
+    private ImageButton           btnSettings;
+    private FloatingActionButton  fabAdd;
+    private View                  rootView;
 
-    private boolean searchVisible = false;
+    private boolean searchVisible  = false;
     private boolean isLaunchingChild = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_home);
-
         bindViews();
         setupRecyclerView();
         setupViewModel();
@@ -66,12 +70,10 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
     @Override
     protected void onResume() {
         super.onResume();
-
         if (!SessionManager.isUnlocked()) {
             redirectToLogin();
             return;
         }
-
         SessionManager.refreshSession();
         viewModel.loadEntries();
     }
@@ -79,43 +81,44 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
     @Override
     protected void onStop() {
         super.onStop();
-        if (!isLaunchingChild) {
-            SessionManager.clearSession();
-        }
+        if (!isLaunchingChild) SessionManager.clearSession();
         isLaunchingChild = false;
     }
 
     private void bindViews() {
-        recyclerView = findViewById(R.id.home_recycler_view);
-        searchView = findViewById(R.id.home_search_view);
-        chipGroup = findViewById(R.id.home_chip_group);
-        emptyState = findViewById(R.id.home_empty_state);
-        tvEntryCount = findViewById(R.id.home_tv_entry_count);
-        btnSearch = findViewById(R.id.home_btn_search);
-        btnSettings = findViewById(R.id.home_btn_settings);
-        btnLock = findViewById(R.id.home_btn_lock);
-        fabAdd = findViewById(R.id.home_fab_add);
-        rootView = findViewById(android.R.id.content);
+        recyclerView  = findViewById(R.id.home_recycler_view);
+        searchView    = findViewById(R.id.home_search_view);
+        chipGroup     = findViewById(R.id.home_chip_group);
+        emptyState    = findViewById(R.id.home_empty_state);
+        tvEntryCount  = findViewById(R.id.home_tv_entry_count);
+        btnSearch     = findViewById(R.id.home_btn_search);
+        btnSettings   = findViewById(R.id.home_btn_settings);
+        btnLock       = findViewById(R.id.home_btn_lock);
+        fabAdd        = findViewById(R.id.home_fab_add);
+        rootView      = findViewById(android.R.id.content);
     }
 
     private void setupRecyclerView() {
         adapter = new VaultEntryAdapter(this, this);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
         RecyclerView.ItemAnimator animator = recyclerView.getItemAnimator();
-        if (animator != null) {
-            ((androidx.recyclerview.widget.SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
+        if (animator instanceof androidx.recyclerview.widget.SimpleItemAnimator) {
+            ((androidx.recyclerview.widget.SimpleItemAnimator) animator)
+                    .setSupportsChangeAnimations(false);
         }
+
         setupSwipeToDelete();
     }
 
     private void setupSwipeToDelete() {
-        ItemTouchHelper.SimpleCallback swipeCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        ItemTouchHelper.SimpleCallback callback =
+                new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
 
             @Override
-            public boolean onMove(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh,
+            public boolean onMove(@NonNull RecyclerView rv,
+                    @NonNull RecyclerView.ViewHolder vh,
                     @NonNull RecyclerView.ViewHolder target) {
                 return false;
             }
@@ -124,7 +127,6 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
                 VaultEntry swiped = adapter.getEntries().get(position);
-
                 adapter.removeAt(position);
 
                 Snackbar.make(rootView,
@@ -147,9 +149,62 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
                         .setActionTextColor(getColor(R.color.citadel_gold))
                         .show();
             }
+
+            /**
+             * Paints the delete affordance behind the swiping card.
+             *
+             * Draw order matters:
+             *   1. Red background  — painted onto the canvas first
+             *   2. Trash icon      — painted on top of the background
+             *   3. super           — draws the card on top, covering what hasn't slid away
+             *
+             * Result: red background and trash icon are only visible in the
+             * region the card has already moved away from.
+             */
+            @Override
+            public void onChildDraw(@NonNull Canvas c,
+                    @NonNull RecyclerView recyclerView,
+                    @NonNull RecyclerView.ViewHolder viewHolder,
+                    float dX, float dY,
+                    int actionState, boolean isCurrentlyActive) {
+
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE && dX < 0) {
+                    View item = viewHolder.itemView;
+
+                    // Background — deep red, not alarming
+                    Paint bgPaint = new Paint();
+                    bgPaint.setColor(0xFFB71C1C);
+                    bgPaint.setAntiAlias(true);
+                    c.drawRect(
+                            item.getRight() + dX,
+                            item.getTop(),
+                            item.getRight(),
+                            item.getBottom(),
+                            bgPaint);
+
+                    // Trash icon — centered vertically in the exposed strip
+                    Drawable icon = ContextCompat.getDrawable(
+                            recyclerView.getContext(), R.drawable.ic_delete);
+                    if (icon != null) {
+                        int iconSize   = dpToPx(22);
+                        int iconMargin = (item.getHeight() - iconSize) / 2;
+                        int iconTop    = item.getTop()     + iconMargin;
+                        int iconBottom = item.getBottom()  - iconMargin;
+                        int iconRight  = item.getRight()   - iconMargin;
+                        int iconLeft   = iconRight         - iconSize;
+
+                        icon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
+                        icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                        icon.draw(c);
+                    }
+                }
+
+                super.onChildDraw(c, recyclerView, viewHolder,
+                        dX, dY, actionState, isCurrentlyActive);
+            }
         };
 
-        new ItemTouchHelper(swipeCallback).attachToRecyclerView(recyclerView);
+        new ItemTouchHelper(callback).attachToRecyclerView(recyclerView);
     }
 
     private void setupViewModel() {
@@ -157,7 +212,6 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
 
         viewModel.getFilteredEntries().observe(this, entries -> {
             adapter.submitList(entries);
-
             boolean isEmpty = entries == null || entries.isEmpty();
             emptyState.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
             recyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
@@ -182,35 +236,30 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
             }
         });
 
-        viewModel.getIsLoading().observe(this, loading -> {
-        });
+        viewModel.getIsLoading().observe(this, loading -> {});
     }
 
     private void attachListeners() {
-
         fabAdd.setOnClickListener(v -> {
-            Intent intent = new Intent(this, AddEditActivity.class);
             isLaunchingChild = true;
-            startActivity(intent);
+            startActivity(new Intent(this, AddEditActivity.class));
         });
 
         btnSearch.setOnClickListener(v -> toggleSearchBar());
-        btnSettings.setOnClickListener(
-                v -> startActivity(new Intent(this, SettingsActivity.class)));
+
+        btnSettings.setOnClickListener(v -> {
+            isLaunchingChild = true;
+            startActivity(new Intent(this, SettingsActivity.class));
+        });
 
         btnLock.setOnClickListener(v -> lockVault());
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                viewModel.setSearchQuery(query);
-                return true;
+            @Override public boolean onQueryTextSubmit(String query) {
+                viewModel.setSearchQuery(query); return true;
             }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                viewModel.setSearchQuery(newText);
-                return true;
+            @Override public boolean onQueryTextChange(String newText) {
+                viewModel.setSearchQuery(newText); return true;
             }
         });
 
@@ -229,18 +278,13 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
         chipGroup.addView(allChip);
 
         if (categoryNames != null) {
-            for (String category : categoryNames) {
-                chipGroup.addView(createChip(category));
-            }
+            for (String category : categoryNames) chipGroup.addView(createChip(category));
         }
 
         chipGroup.setOnCheckedStateChangeListener((group, checkIds) -> {
-            if (checkIds.isEmpty())
-                return;
+            if (checkIds.isEmpty()) return;
             Chip selected = group.findViewById(checkIds.get(0));
-            if (selected != null) {
-                viewModel.setCategory(selected.getText().toString());
-            }
+            if (selected != null) viewModel.setCategory(selected.getText().toString());
         });
     }
 
@@ -252,7 +296,6 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
         chip.setChipBackgroundColorResource(R.color.cleanthes_surface);
         chip.setTextColor(getColor(R.color.cleanthes_text_secondary));
         chip.setCheckedIconVisible(false);
-
         chip.setChipStrokeColorResource(R.color.cleanthes_border);
         chip.setChipStrokeWidth(1f);
 
@@ -279,9 +322,20 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
         startActivity(intent);
     }
 
+    @Override
+    public void onCopyClick(String password) {
+        android.content.ClipboardManager clipboard =
+                (android.content.ClipboardManager) getSystemService(
+                        android.content.Context.CLIPBOARD_SERVICE);
+        clipboard.setPrimaryClip(
+                android.content.ClipData.newPlainText("password", password));
+        android.widget.Toast.makeText(this,
+                "Password copied to clipboard",
+                android.widget.Toast.LENGTH_SHORT).show();
+    }
+
     private void toggleSearchBar() {
         searchVisible = !searchVisible;
-
         if (searchVisible) {
             searchView.setVisibility(View.VISIBLE);
             searchView.requestFocus();
@@ -307,15 +361,8 @@ public class HomeActivity extends AppCompatActivity implements VaultEntryAdapter
         finish();
     }
 
-    @Override
-    public void onCopyClick(String password) {
-        // This provides the actual logic for the button in the list
-        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(
-                android.content.Context.CLIPBOARD_SERVICE);
-        android.content.ClipData clip = android.content.ClipData.newPlainText("password", password);
-        clipboard.setPrimaryClip(clip);
-
-        android.widget.Toast.makeText(this, "Password copied to clipboard", android.widget.Toast.LENGTH_SHORT).show();
+    private int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
     }
-
 }
+
