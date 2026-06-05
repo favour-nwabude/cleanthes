@@ -16,16 +16,13 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import dev.favourdevlabs.cleanthes.R
-import dev.favourdevlabs.cleanthes.data.repository.VaultRepository
 import dev.favourdevlabs.cleanthes.security.BiometricHelper
 import dev.favourdevlabs.cleanthes.security.KeyDerivation
 import dev.favourdevlabs.cleanthes.ui.home.HomeActivity
-import javax.crypto.SecretKey
 
 class LoginActivity : AppCompatActivity() {
 
@@ -54,6 +51,7 @@ class LoginActivity : AppCompatActivity() {
     private var storedMasterHash: String? = null
     private var biometricEnabled = false
     private var storedBiometricSecret: String? = null
+    private var isAuthenticating = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,15 +101,22 @@ class LoginActivity : AppCompatActivity() {
         }
 
         btnUnlock.backgroundTintList =
-            ColorStateList.valueOf(ContextCompat.getColor(this, R.color.citadel_gold))
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.citadel_gold))
     }
 
     private fun attachListeners() {
-        etPassword.addTextChangedListener(object : SimpleTextWatcher() {
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                hideError()
-            }
-        })
+        etPassword.addTextChangedListener(
+                object : SimpleTextWatcher() {
+                    override fun onTextChanged(
+                            s: CharSequence,
+                            start: Int,
+                            before: Int,
+                            count: Int
+                    ) {
+                        hideError()
+                    }
+                }
+        )
 
         btnTogglePassword.setOnClickListener {
             passwordVisible = !passwordVisible
@@ -123,64 +128,96 @@ class LoginActivity : AppCompatActivity() {
             true
         }
 
-        btnUnlock.setOnClickListener {
-            if (!isLockedOut) attemptPasswordUnlock()
-        }
+        btnUnlock.setOnClickListener { if (!isLockedOut) attemptPasswordUnlock() }
 
         btnBiometric.setOnClickListener {
-            if (BiometricHelper.isBiometricAvailable(this)) {
-                BiometricHelper.authenticate(this, object : BiometricHelper.AuthCallback {
-                    override fun onSuccess() = deriveKeyAndNavigate(null, fromBiometric = true)
-                    override fun onFailure() {}
-                    override fun onError(errorMessage: String) = showError(errorMessage)
-                })
+    if (isAuthenticating) return@setOnClickListener  // guard
+    if (BiometricHelper.isBiometricAvailable(this)) {
+        isAuthenticating = true
+        btnBiometric.isEnabled = false  // visual feedback too
+        BiometricHelper.authenticate(this, object : BiometricHelper.AuthCallback {
+            override fun onSuccess() {
+                isAuthenticating = false
+                deriveKeyAndNavigate(null, fromBiometric = true)
             }
-        }
+            override fun onFailure() {
+                isAuthenticating = false
+                btnBiometric.isEnabled = true
+            }
+            override fun onError(errorMessage: String) {
+                isAuthenticating = false
+                btnBiometric.isEnabled = true
+                showError(errorMessage)
+            }
+        })
+    }
+}
     }
 
     private fun attemptPasswordUnlock() {
         val password = etPassword.text.toString()
-        if (password.isEmpty()) { showError("Enter your master password"); return }
+        if (password.isEmpty()) {
+            showError("Enter your master password")
+            return
+        }
         setLoadingState(true)
         Thread { verifyPasswordOnBackground(password) }.start()
     }
 
     private fun verifyPasswordOnBackground(attempt: String) {
-    val authSalt   = storedAuthSalt   ?: return
-    val masterHash = storedMasterHash ?: return
-    try {
-        val correct = KeyDerivation.verifyMasterPassword(
-            attempt.toCharArray(), authSalt, masterHash
-        )
-           runOnUiThread {
+        val authSalt = storedAuthSalt ?: return
+        val masterHash = storedMasterHash ?: return
+        try {
+            val correct =
+                    KeyDerivation.verifyMasterPassword(attempt.toCharArray(), authSalt, masterHash)
+            runOnUiThread {
                 setLoadingState(false)
-                if (correct) { failedAttempts = 0; deriveKeyAndNavigate(attempt, fromBiometric = false) }
-                else handleFailedAttempt()
+                if (correct) {
+                    failedAttempts = 0
+                    deriveKeyAndNavigate(attempt, fromBiometric = false)
+                } else handleFailedAttempt()
             }
         } catch (e: Exception) {
-            runOnUiThread { setLoadingState(false); showError(getString(R.string.error_generic)) }
+            runOnUiThread {
+                setLoadingState(false)
+                showError(getString(R.string.error_generic))
+            }
         }
     }
 
     private fun deriveKeyAndNavigate(masterPassword: String?, fromBiometric: Boolean) {
         setLoadingState(true)
         Thread {
-            try {
-                val saltBytes = android.util.Base64.decode(storedEncSalt, android.util.Base64.DEFAULT)
-                val source = if (fromBiometric) storedBiometricSecret!! else masterPassword!!
-                val sessionKey = KeyDerivation.deriveKey(source.toCharArray(), saltBytes)
-                SessionManager.setSessionKey(sessionKey)
-                runOnUiThread { setLoadingState(false); navigateToHome() }
-            } catch (e: Exception) {
-                runOnUiThread { setLoadingState(false); showError(getString(R.string.error_generic)) }
-            }
-        }.start()
+                    try {
+                        val saltBytes =
+                                android.util.Base64.decode(
+                                        storedEncSalt,
+                                        android.util.Base64.DEFAULT
+                                )
+                        val source =
+                                if (fromBiometric) storedBiometricSecret!! else masterPassword!!
+                        val sessionKey = KeyDerivation.deriveKey(source.toCharArray(), saltBytes)
+                        SessionManager.setSessionKey(sessionKey)
+                        runOnUiThread {
+                            setLoadingState(false)
+                            navigateToHome()
+                        }
+                    } catch (e: Exception) {
+                        runOnUiThread {
+                            setLoadingState(false)
+                            showError(getString(R.string.error_generic))
+                        }
+                    }
+                }
+                .start()
     }
 
     private fun navigateToHome() {
-        startActivity(Intent(this, HomeActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        })
+        startActivity(
+                Intent(this, HomeActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+        )
         finish()
     }
 
@@ -203,63 +240,75 @@ class LoginActivity : AppCompatActivity() {
         btnUnlock.isEnabled = false
         etPassword.isEnabled = false
 
-        lockoutTimer = object : CountDownTimer(LOCKOUT_DURATION_MS, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                val secondsLeft = (millisUntilFinished / 1000).toInt()
-                tvAttempts.text = getString(R.string.login_locked_out, secondsLeft)
-                tvAttempts.visibility = View.VISIBLE
-                tvAttempts.setTextColor(ContextCompat.getColor(this@LoginActivity, R.color.cleanthes_error))
-            }
+        lockoutTimer =
+                object : CountDownTimer(LOCKOUT_DURATION_MS, 1000) {
+                            override fun onTick(millisUntilFinished: Long) {
+                                val secondsLeft = (millisUntilFinished / 1000).toInt()
+                                tvAttempts.text = getString(R.string.login_locked_out, secondsLeft)
+                                tvAttempts.visibility = View.VISIBLE
+                                tvAttempts.setTextColor(
+                                        ContextCompat.getColor(
+                                                this@LoginActivity,
+                                                R.color.cleanthes_error
+                                        )
+                                )
+                            }
 
-            override fun onFinish() {
-                isLockedOut = false
-                failedAttempts = 0
-                btnUnlock.isEnabled = true
-                etPassword.isEnabled = true
-                tvAttempts.visibility = View.GONE
-                tvError.visibility = View.GONE
-                etPassword.requestFocus()
-            }
-        }.start()
+                            override fun onFinish() {
+                                isLockedOut = false
+                                failedAttempts = 0
+                                btnUnlock.isEnabled = true
+                                etPassword.isEnabled = true
+                                tvAttempts.visibility = View.GONE
+                                tvError.visibility = View.GONE
+                                etPassword.requestFocus()
+                            }
+                        }
+                        .start()
     }
 
     private fun togglePasswordVisibility(visible: Boolean) {
-        etPassword.inputType = if (visible)
-            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-        else
-            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        etPassword.inputType =
+                if (visible)
+                        InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                else InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         etPassword.setSelection(etPassword.text.length)
-        btnTogglePassword.setImageResource(if (visible) R.drawable.ic_eye_on else R.drawable.ic_eye_off)
+        btnTogglePassword.setImageResource(
+                if (visible) R.drawable.ic_eye_on else R.drawable.ic_eye_off
+        )
     }
 
     private fun setLoadingState(loading: Boolean) {
         btnUnlock.isEnabled = !loading && !isLockedOut
         btnUnlock.alpha = if (loading) 0.5f else 1.0f
         btnUnlock.backgroundTintList =
-            ColorStateList.valueOf(ContextCompat.getColor(this, R.color.citadel_gold))
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.citadel_gold))
         progressBar.visibility = if (loading) View.VISIBLE else View.GONE
     }
 
-    private fun showError(message: String) { tvError.text = message; tvError.visibility = View.VISIBLE }
-    private fun hideError() { tvError.visibility = View.GONE }
+    private fun showError(message: String) {
+        tvError.text = message
+        tvError.visibility = View.VISIBLE
+    }
+    private fun hideError() {
+        tvError.visibility = View.GONE
+    }
 
     private fun shakeView(view: View) {
         ObjectAnimator.ofFloat(view, "translationX", 0f, -16f, 16f, -12f, 12f, -8f, 8f, -4f, 4f, 0f)
-            .apply { duration = 500 }
-            .start()
+                .apply { duration = 500 }
+                .start()
     }
 
     @Throws(Exception::class)
     private fun getEncryptedPrefs(): SharedPreferences {
-        val masterKey = MasterKey.Builder(this)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
+        val masterKey = MasterKey.Builder(this).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
         return EncryptedSharedPreferences.create(
-            this,
-            SetupActivity.PREFS_NAME,
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                this,
+                SetupActivity.PREFS_NAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
     }
 
