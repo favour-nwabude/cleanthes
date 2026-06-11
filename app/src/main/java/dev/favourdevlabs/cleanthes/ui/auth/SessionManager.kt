@@ -1,10 +1,15 @@
 package dev.favourdevlabs.cleanthes.ui.auth
 
 import javax.crypto.SecretKey
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object SessionManager {
+@Singleton
+class SessionManager @Inject constructor() {
 
-    private const val SESSION_TIMEOUT_MS = 5 * 60 * 1000L // 5 minutes
+    companion object {
+        private const val SESSION_TIMEOUT_MS = 5 * 60 * 1000L
+    }
 
     @Volatile private var sessionKey: SecretKey? = null
     @Volatile private var sessionStartTime: Long = 0L

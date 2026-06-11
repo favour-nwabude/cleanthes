@@ -1,29 +1,15 @@
 package dev.favourdevlabs.cleanthes.data.repository
 
-import android.content.Context
-import dev.favourdevlabs.cleanthes.data.db.DatabaseHelper
 import dev.favourdevlabs.cleanthes.data.db.VaultDao
 import dev.favourdevlabs.cleanthes.data.entities.VaultEntry
 import dev.favourdevlabs.cleanthes.security.CryptoManager
 import javax.crypto.SecretKey
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class VaultRepository(private val vaultDao: VaultDao) {
+@Singleton
+class VaultRepository @Inject constructor(private val vaultDao: VaultDao) {
 
-    companion object {
-        @Volatile private var instance: VaultRepository? = null
-
-        @Synchronized
-        fun getInstance(context: Context): VaultRepository =
-            instance ?: VaultRepository(
-                VaultDao(DatabaseHelper.getInstance(context.applicationContext))
-            ).also { instance = it }
-    }
-
-    // -------------------------------------------------------------------------
-    // Write
-    // -------------------------------------------------------------------------
-
-    /** No TOTP — backward-compatible overload. */
     @Throws(Exception::class)
     fun addEntry(
         title: String, userName: String, plainPassword: String,
@@ -34,7 +20,6 @@ class VaultRepository(private val vaultDao: VaultDao) {
         isFavorite, null, null, 6, 30, "SHA1", key
     )
 
-    /** Full overload — includes all TOTP fields. */
     @Throws(Exception::class)
     fun addEntry(
         title: String, userName: String, plainPassword: String,
@@ -65,7 +50,6 @@ class VaultRepository(private val vaultDao: VaultDao) {
             totpPeriod        = totpPeriod,
             totpAlgorithm     = totpAlgorithm ?: "SHA1"
         )
-
         val id = vaultDao.insert(entry)
         if (id != -1L) entry.id = id
         return id
@@ -81,12 +65,7 @@ class VaultRepository(private val vaultDao: VaultDao) {
     }
 
     fun deleteEntry(id: Long): Int = vaultDao.deleteById(id)
-
-    fun wipeVault(): Int = vaultDao.deleteAll()
-
-    // -------------------------------------------------------------------------
-    // Read
-    // -------------------------------------------------------------------------
+    fun wipeVault(): Int           = vaultDao.deleteAll()
 
     @Throws(Exception::class)
     fun getAllEntries(key: SecretKey): List<VaultEntry> =
@@ -109,10 +88,7 @@ class VaultRepository(private val vaultDao: VaultDao) {
         decryptAll(vaultDao.getFavoriteEntries(), key)
 
     fun getAllCategories(): List<String> = vaultDao.getAllCategories()
-
-    fun getEntryCount(): Int = vaultDao.getEntryCount()
-
-    // -------------------------------------------------------------------------
+    fun getEntryCount(): Int            = vaultDao.getEntryCount()
 
     @Throws(Exception::class)
     private fun decrypt(e: VaultEntry, key: SecretKey): VaultEntry {

@@ -1,14 +1,16 @@
 package dev.favourdevlabs.cleanthes.utils
 
-import dagger.hilt.android.HiltAndroidApp
-
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import dagger.hilt.android.HiltAndroidApp
 import dev.favourdevlabs.cleanthes.ui.auth.SessionManager
+import javax.inject.Inject
 
 @HiltAndroidApp
 class CleanthesApplication : Application() {
+
+    @Inject lateinit var sessionManager: SessionManager
 
     private var startedActivityCount = 0
 
@@ -36,7 +38,7 @@ class CleanthesApplication : Application() {
     }
 
     private fun onAppBackgrounded() {
-        SessionManager.clearSession()
+        sessionManager.clearSession()
         ClipboardHelper.clearClipboard(applicationContext)
     }
 }

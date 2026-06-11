@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.viewModels
+import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -60,6 +61,7 @@ private class ScanQrContract : ActivityResultContract<Unit, String?>() {
         IntentIntegrator.parseActivityResult(resultCode, intent)?.contents
 }
 
+@AndroidEntryPoint
 class AddEditActivity : AuthenticatedActivity() {
 
     companion object {

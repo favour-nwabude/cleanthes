@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.activity.ComponentActivity
+import dagger.hilt.android.AndroidEntryPoint
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
@@ -45,6 +46,7 @@ import dev.favourdevlabs.cleanthes.ui.components.*
 import dev.favourdevlabs.cleanthes.ui.theme.*
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class SetupActivity : ComponentActivity() {
 
     private val viewModel: SetupViewModel by viewModels()

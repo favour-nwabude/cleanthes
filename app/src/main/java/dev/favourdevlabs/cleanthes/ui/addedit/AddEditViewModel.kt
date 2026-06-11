@@ -1,12 +1,14 @@
 package dev.favourdevlabs.cleanthes.ui.addedit
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.favourdevlabs.cleanthes.data.entities.VaultEntry
-import dev.favourdevlabs.cleanthes.data.repository.VaultRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.favourdevlabs.cleanthes.domain.usecase.DeleteVaultEntryUseCase
+import dev.favourdevlabs.cleanthes.domain.usecase.GetVaultEntryUseCase
+import dev.favourdevlabs.cleanthes.domain.usecase.SaveVaultEntryUseCase
 import dev.favourdevlabs.cleanthes.security.OtpAuthParser
 import dev.favourdevlabs.cleanthes.security.TOTPGenerator
+import dev.favourdevlabs.cleanthes.data.entities.VaultEntry
 import dev.favourdevlabs.cleanthes.ui.auth.SessionManager
 import dev.favourdevlabs.cleanthes.utils.PasswordGenerator
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 sealed interface AddEditEvent {
     data object NavigateBack : AddEditEvent
@@ -38,16 +41,19 @@ data class AddEditUiState(
     val strengthScore: Int = 0,
     val errorMessage: String? = null,
     val showDeleteDialog: Boolean = false,
-    // TOTP metadata — RFC 6238 defaults, overwritten on QR scan or entry load
     val totpAlgorithm: String = "SHA1",
     val totpDigits: Int = 6,
     val totpPeriod: Int = 30,
     val totpIssuer: String? = null,
 )
 
-class AddEditViewModel(app: Application) : AndroidViewModel(app) {
-
-    private val repository = VaultRepository.getInstance(getApplication())
+@HiltViewModel
+class AddEditViewModel @Inject constructor(
+    private val getVaultEntry: GetVaultEntryUseCase,
+    private val saveVaultEntry: SaveVaultEntryUseCase,
+    private val deleteVaultEntry: DeleteVaultEntryUseCase,
+    private val sessionManager: SessionManager,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddEditUiState())
     val uiState: StateFlow<AddEditUiState> = _uiState.asStateFlow()
@@ -61,27 +67,27 @@ class AddEditViewModel(app: Application) : AndroidViewModel(app) {
     fun initForEntry(entryId: Long) {
         if (initialized) return
         initialized = true
-        if (entryId == -1L) return  // new entry — defaults are fine
+        if (entryId == -1L) return
 
         _uiState.update { it.copy(isEditMode = true, isLoading = true) }
         viewModelScope.launch {
             try {
-                val key = SessionManager.getSessionKey() ?: run {
+                val key = sessionManager.getSessionKey() ?: run {
                     _events.send(AddEditEvent.NavigateBack); return@launch
                 }
-                val entry = withContext(Dispatchers.IO) { repository.getEntryById(entryId, key) }
+                val entry = withContext(Dispatchers.IO) { getVaultEntry(entryId, key) }
                 if (entry == null) { _events.send(AddEditEvent.NavigateBack); return@launch }
                 existingEntry = entry
                 _uiState.update {
                     it.copy(
                         isLoading     = false,
-                        title         = entry.title          ?: "",
-                        username      = entry.username       ?: "",
+                        title         = entry.title             ?: "",
+                        username      = entry.username          ?: "",
                         password      = entry.encryptedPassword ?: "",
-                        website       = entry.website        ?: "",
-                        category      = entry.category       ?: "",
-                        notes         = entry.notes          ?: "",
-                        totpSecret    = entry.totpSecret     ?: "",
+                        website       = entry.website           ?: "",
+                        category      = entry.category          ?: "",
+                        notes         = entry.notes             ?: "",
+                        totpSecret    = entry.totpSecret        ?: "",
                         isFavorite    = entry.isFavorite,
                         totpAlgorithm = entry.totpAlgorithm,
                         totpDigits    = entry.totpDigits,
@@ -118,9 +124,9 @@ class AddEditViewModel(app: Application) : AndroidViewModel(app) {
 
     fun onGeneratedPassword(password: String) = _uiState.update {
         it.copy(
-            password      = password,
+            password        = password,
             passwordVisible = true,
-            strengthScore = PasswordGenerator.evaluateStrength(password),
+            strengthScore   = PasswordGenerator.evaluateStrength(password),
         )
     }
 
@@ -140,7 +146,7 @@ class AddEditViewModel(app: Application) : AndroidViewModel(app) {
                 )
             }
         } catch (e: UnsupportedOperationException) {
-            _uiState.update { it.copy(errorMessage = "HOTP is not supported — only TOTP (time-based) codes.") }
+            _uiState.update { it.copy(errorMessage = "HOTP is not supported — only TOTP codes.") }
         } catch (_: Exception) {
             _uiState.update { it.copy(errorMessage = "Invalid QR code — not a valid 2FA setup code.") }
         }
@@ -163,7 +169,7 @@ class AddEditViewModel(app: Application) : AndroidViewModel(app) {
         }
         if (error != null) { _uiState.update { it.copy(errorMessage = error) }; return }
 
-        val key = SessionManager.getSessionKey() ?: run {
+        val key = sessionManager.getSessionKey() ?: run {
             viewModelScope.launch { _events.send(AddEditEvent.NavigateBack) }; return
         }
 
@@ -188,16 +194,16 @@ class AddEditViewModel(app: Application) : AndroidViewModel(app) {
                             this.totpDigits    = s.totpDigits
                             this.totpPeriod    = s.totpPeriod
                         }
-                        repository.updateEntry(existingEntry!!, password, key)
+                        saveVaultEntry(SaveVaultEntryUseCase.Params.Edit(existingEntry!!, password, key))
                     } else {
-                        repository.addEntry(
+                        saveVaultEntry(SaveVaultEntryUseCase.Params.New(
                             title, username, password,
                             s.website.trim().ifEmpty { null },
                             s.category,
                             s.notes.trim().ifEmpty { null },
                             s.isFavorite, finalTotp, finalIssuer,
                             s.totpDigits, s.totpPeriod, s.totpAlgorithm, key,
-                        )
+                        ))
                     }
                 }
                 _events.send(AddEditEvent.NavigateBack)
@@ -211,7 +217,7 @@ class AddEditViewModel(app: Application) : AndroidViewModel(app) {
         val entry = existingEntry ?: return
         viewModelScope.launch {
             try {
-                withContext(Dispatchers.IO) { repository.deleteEntry(entry.id) }
+                withContext(Dispatchers.IO) { deleteVaultEntry(entry.id) }
                 _events.send(AddEditEvent.NavigateBack)
             } catch (_: Exception) {
                 _uiState.update { it.copy(showDeleteDialog = false, errorMessage = "Failed to delete entry.") }

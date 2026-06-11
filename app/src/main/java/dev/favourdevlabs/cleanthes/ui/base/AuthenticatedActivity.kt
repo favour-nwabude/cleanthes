@@ -2,23 +2,27 @@ package dev.favourdevlabs.cleanthes.ui.base
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
+import dagger.hilt.android.AndroidEntryPoint
 import dev.favourdevlabs.cleanthes.ui.auth.LoginActivity
 import dev.favourdevlabs.cleanthes.ui.auth.SessionManager
+import javax.inject.Inject
 
+@AndroidEntryPoint
 abstract class AuthenticatedActivity : AppCompatActivity() {
+
+    @Inject lateinit var sessionManager: SessionManager
 
     override fun onStart() {
         super.onStart()
-        if (!SessionManager.isUnlocked()) {
+        if (!sessionManager.isUnlocked()) {
             redirectToLogin()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        // Only refresh — never make redirect decisions here
-        if (SessionManager.isUnlocked()) {
-            SessionManager.refreshSession()
+        if (sessionManager.isUnlocked()) {
+            sessionManager.refreshSession()
         }
     }
 
@@ -30,4 +34,3 @@ abstract class AuthenticatedActivity : AppCompatActivity() {
         finish()
     }
 }
-

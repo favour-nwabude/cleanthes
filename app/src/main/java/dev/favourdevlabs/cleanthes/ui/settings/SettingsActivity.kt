@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.autofill.AutofillManager
 import androidx.activity.compose.setContent
+import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -33,6 +34,7 @@ private val LOCK_LABELS = arrayOf("1 min", "5 min", "15 min", "Never")
 private val CLIP_VALUES = intArrayOf(30, 60, -1)
 private val CLIP_LABELS = arrayOf("30s", "60s", "Off")
 
+@AndroidEntryPoint
 class SettingsActivity : AuthenticatedActivity() {
 
     companion object {

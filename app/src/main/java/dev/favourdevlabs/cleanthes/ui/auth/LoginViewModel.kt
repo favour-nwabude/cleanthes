@@ -6,7 +6,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.favourdevlabs.cleanthes.security.BiometricHelper
+import dev.favourdevlabs.cleanthes.domain.usecase.UnlockVaultUseCase
 import dev.favourdevlabs.cleanthes.security.KeyDerivation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 internal const val MAX_ATTEMPTS             = 5
 internal const val LOCKOUT_DURATION_SECONDS = 30
@@ -40,7 +43,12 @@ data class LoginUiState(
     val shakeCounter: Int = 0,
 )
 
-class LoginViewModel(app: Application) : AndroidViewModel(app) {
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    app: Application,
+    private val sessionManager: SessionManager,
+    private val unlockVault: UnlockVaultUseCase,
+) : AndroidViewModel(app) {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -80,7 +88,7 @@ class LoginViewModel(app: Application) : AndroidViewModel(app) {
                 BiometricHelper.isBiometricAvailable(getApplication())
 
             _uiState.update { it.copy(showBiometricSection = biometricAvailable) }
-        } catch (_: Exception) { /* vault may not exist yet */ }
+        } catch (_: Exception) { }
     }
 
     fun onPasswordChange(value: String) =
@@ -103,7 +111,6 @@ class LoginViewModel(app: Application) : AndroidViewModel(app) {
     private suspend fun verifyPassword(attempt: String) {
         val authSalt   = storedAuthSalt   ?: return resetLoading("Vault data missing")
         val masterHash = storedMasterHash ?: return resetLoading("Vault data missing")
-
         try {
             val correct = withContext(Dispatchers.IO) {
                 KeyDerivation.verifyMasterPassword(attempt.toCharArray(), authSalt, masterHash)
@@ -138,13 +145,15 @@ class LoginViewModel(app: Application) : AndroidViewModel(app) {
     fun onBiometricError(message: String) =
         _uiState.update { it.copy(isAuthenticating = false, errorMessage = message) }
 
-    private suspend fun deriveKeyAndNavigate(masterPassword: String?, fromBiometric: Boolean) {
+private suspend fun deriveKeyAndNavigate(masterPassword: String?, fromBiometric: Boolean) {
         try {
             withContext(Dispatchers.IO) {
-                val saltBytes  = Base64.decode(storedEncSalt, Base64.DEFAULT)
-                val source     = if (fromBiometric) storedBiometricSecret!! else masterPassword!!
-                val sessionKey = KeyDerivation.deriveKey(source.toCharArray(), saltBytes)
-                SessionManager.setSessionKey(sessionKey)
+                val encSalt = storedEncSalt ?: throw IllegalStateException("Salt missing")
+                val params  = if (fromBiometric)
+                    UnlockVaultUseCase.Params.Biometric(storedBiometricSecret!!, encSalt)
+                else
+                    UnlockVaultUseCase.Params.Password(masterPassword!!, encSalt)
+                unlockVault(params)
             }
             _events.send(LoginEvent.NavigateToHome)
         } catch (_: Exception) {
@@ -155,7 +164,7 @@ class LoginViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private fun handleFailedAttempt() {
+        private fun handleFailedAttempt() {
         failedAttempts++
         _uiState.update {
             it.copy(

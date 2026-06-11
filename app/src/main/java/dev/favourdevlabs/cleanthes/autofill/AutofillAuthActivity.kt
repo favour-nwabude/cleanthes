@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import dagger.hilt.android.AndroidEntryPoint
 import dev.favourdevlabs.cleanthes.R
 import dev.favourdevlabs.cleanthes.data.entities.VaultEntry
 import dev.favourdevlabs.cleanthes.data.repository.VaultRepository
@@ -27,8 +28,13 @@ import dev.favourdevlabs.cleanthes.ui.theme.CleanthesTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AutofillAuthActivity : AppCompatActivity() {
+
+    @Inject lateinit var sessionManager: SessionManager
+    @Inject lateinit var repository: VaultRepository
 
     companion object {
         const val EXTRA_PACKAGE_NAME = "pkg"
@@ -43,9 +49,6 @@ class AutofillAuthActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE,
         )
-
-        // No visible UI — BiometricPrompt is a system overlay.
-        // setContent replaces setContentView purely to provide a themed window.
         setContent {
             CleanthesTheme {
                 Box(
@@ -55,11 +58,9 @@ class AutofillAuthActivity : AppCompatActivity() {
                 )
             }
         }
-
-        if (!SessionManager.isUnlocked()) {
+        if (!sessionManager.isUnlocked()) {
             setResult(RESULT_CANCELED); finish(); return
         }
-
         prompt()
     }
 
@@ -85,7 +86,7 @@ class AutofillAuthActivity : AppCompatActivity() {
     }
 
     private fun deliver() {
-        val secretKey   = SessionManager.getSessionKey()
+        val secretKey  = sessionManager.getSessionKey()
             ?: run { setResult(RESULT_CANCELED); finish(); return }
         val usernameId  = intent.getParcelableExtra<AutofillId>(EXTRA_USERNAME_ID)
         val passwordId  = intent.getParcelableExtra<AutofillId>(EXTRA_PASSWORD_ID)
@@ -96,17 +97,11 @@ class AutofillAuthActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val matches = withContext(Dispatchers.IO) {
-                    filter(
-                        VaultRepository.getInstance(this@AutofillAuthActivity)
-                            .getAllEntries(secretKey),
-                        lookupKey,
-                    )
+                    filter(repository.getAllEntries(secretKey), lookupKey)
                 }
-
                 if (matches.isEmpty()) {
                     setResult(RESULT_CANCELED); finish(); return@launch
                 }
-
                 val response = FillResponse.Builder()
                 for (entry in matches) {
                     val view = RemoteViews(packageName, R.layout.autofill_item).apply {
@@ -119,8 +114,7 @@ class AutofillAuthActivity : AppCompatActivity() {
                             .build()
                     )
                 }
-
-                SessionManager.refreshSession()
+                sessionManager.refreshSession()
                 setResult(
                     RESULT_OK,
                     Intent().putExtra(

@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -40,6 +41,7 @@ import dev.favourdevlabs.cleanthes.ui.addedit.AddEditActivity
 import dev.favourdevlabs.cleanthes.ui.base.AuthenticatedActivity
 import dev.favourdevlabs.cleanthes.ui.theme.*
 
+@AndroidEntryPoint
 class DetailActivity : AuthenticatedActivity() {
 
     companion object {

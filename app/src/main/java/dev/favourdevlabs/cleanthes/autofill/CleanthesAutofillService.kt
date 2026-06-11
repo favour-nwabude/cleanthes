@@ -8,11 +8,17 @@ import android.service.autofill.*
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
+import dagger.hilt.android.AndroidEntryPoint
 import dev.favourdevlabs.cleanthes.R
 import dev.favourdevlabs.cleanthes.data.repository.VaultRepository
 import dev.favourdevlabs.cleanthes.ui.auth.SessionManager
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class CleanthesAutofillService : AutofillService() {
+
+    @Inject lateinit var sessionManager: SessionManager
+    @Inject lateinit var repository: VaultRepository
 
     override fun onFillRequest(
         request: FillRequest,
@@ -24,8 +30,7 @@ class CleanthesAutofillService : AutofillService() {
         val parsed    = StructureParser.parse(structure)
 
         if (parsed.usernameId == null || parsed.passwordId == null) {
-            callback.onSuccess(null)
-            return
+            callback.onSuccess(null); return
         }
 
         val key = parsed.webDomain ?: parsed.packageName ?: ""
@@ -63,19 +68,15 @@ class CleanthesAutofillService : AutofillService() {
     }
 
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
-        val secretKey = SessionManager.getSessionKey()
-        if (secretKey == null) {
-            callback.onSuccess()
-            return
-        }
+        val secretKey = sessionManager.getSessionKey()
+        if (secretKey == null) { callback.onSuccess(); return }
 
         val contexts  = request.fillContexts
         val structure = contexts[contexts.size - 1].structure
         val parsed    = StructureParser.parse(structure)
 
         if (parsed.usernameId == null || parsed.passwordId == null) {
-            callback.onSuccess()
-            return
+            callback.onSuccess(); return
         }
 
         val username = extractValue(structure, parsed.usernameId!!)
@@ -84,11 +85,9 @@ class CleanthesAutofillService : AutofillService() {
 
         if (username != null && password != null) {
             try {
-                VaultRepository.getInstance(this)
-                    .addEntry(key, username, password, key, "Autofill", null, false, secretKey)
+                repository.addEntry(key, username, password, key, "Autofill", null, false, secretKey)
             } catch (_: Exception) {}
         }
-
         callback.onSuccess()
     }
 

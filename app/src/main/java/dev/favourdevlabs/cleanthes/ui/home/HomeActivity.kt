@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -41,13 +42,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.favourdevlabs.cleanthes.R
 import dev.favourdevlabs.cleanthes.data.entities.VaultEntry
 import dev.favourdevlabs.cleanthes.ui.addedit.AddEditActivity
-import dev.favourdevlabs.cleanthes.ui.auth.SessionManager
 import dev.favourdevlabs.cleanthes.ui.base.AuthenticatedActivity
 import dev.favourdevlabs.cleanthes.ui.components.cleanthesOutlinedTextFieldColors
 import dev.favourdevlabs.cleanthes.ui.detail.DetailActivity
 import dev.favourdevlabs.cleanthes.ui.settings.SettingsActivity
 import dev.favourdevlabs.cleanthes.ui.theme.*
 
+@AndroidEntryPoint
 class HomeActivity : AuthenticatedActivity() {
 
     private val viewModel: HomeViewModel by viewModels()
@@ -68,7 +69,7 @@ class HomeActivity : AuthenticatedActivity() {
                     onCopyPassword = ::copyToClipboard,
                     onAddNew       = { startActivity(Intent(this, AddEditActivity::class.java)) },
                     onSettings     = { startActivity(Intent(this, SettingsActivity::class.java)) },
-                    onLock         = { SessionManager.clearSession(); redirectToLogin() },
+                    onLock         = { sessionManager.clearSession(); redirectToLogin() },
                 )
             }
         }
