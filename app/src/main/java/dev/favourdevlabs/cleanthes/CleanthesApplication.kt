@@ -1,4 +1,4 @@
-package dev.favourdevlabs.cleanthes.utils
+package dev.favourdevlabs.cleanthes
 
 import android.app.Activity
 import android.app.Application
