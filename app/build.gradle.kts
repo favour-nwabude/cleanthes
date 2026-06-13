@@ -50,6 +50,10 @@ android {
         viewBinding = true   // keep true during migration; flip to false on last screen
     }
 
+    ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 }
 
 dependencies {
@@ -95,5 +99,12 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.59")
     ksp("com.google.dagger:hilt-android-compiler:2.59")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    // -- Room ---------------------------------------------------------
+    val roomVersion = "2.7.1"
+
+implementation("androidx.room:room-runtime:$roomVersion")
+implementation("androidx.room:room-ktx:$roomVersion")
+ksp("androidx.room:room-compiler:$roomVersion")
 
 }

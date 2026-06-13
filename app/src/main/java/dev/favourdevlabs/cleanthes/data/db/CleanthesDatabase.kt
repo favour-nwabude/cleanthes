@@ -44,6 +44,7 @@ abstract class CleanthesDatabase : RoomDatabase() {
                     CleanthesDatabase::class.java,
                     "cleanthes.db"
                 )
+                .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                 .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
                 .also { INSTANCE = it }
