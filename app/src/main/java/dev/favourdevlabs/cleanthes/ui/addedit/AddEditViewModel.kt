@@ -10,7 +10,7 @@ import dev.favourdevlabs.cleanthes.security.OtpAuthParser
 import dev.favourdevlabs.cleanthes.security.TOTPGenerator
 import dev.favourdevlabs.cleanthes.data.entities.VaultEntry
 import dev.favourdevlabs.cleanthes.ui.auth.SessionManager
-import dev.favourdevlabs.cleanthes.utils.PasswordGenerator
+import dev.favourdevlabs.cleanthes.common.PasswordGenerator
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

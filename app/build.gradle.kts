@@ -95,6 +95,8 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 
+    implementation(project(":core:common"))
+
     // ── Hilt ─────────────────────────────────────────────────────────────────
     implementation("com.google.dagger:hilt-android:2.59")
     ksp("com.google.dagger:hilt-android-compiler:2.59")

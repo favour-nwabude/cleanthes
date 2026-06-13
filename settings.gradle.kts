@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Cleanthes"
 include(":app")
+include(":core:common")

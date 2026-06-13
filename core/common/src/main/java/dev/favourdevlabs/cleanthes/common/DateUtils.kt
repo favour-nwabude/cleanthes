@@ -1,4 +1,4 @@
-package dev.favourdevlabs.cleanthes.utils
+package dev.favourdevlabs.cleanthes.common
 
 import java.text.SimpleDateFormat
 import java.util.Date

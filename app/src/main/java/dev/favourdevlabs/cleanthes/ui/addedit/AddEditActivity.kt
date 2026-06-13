@@ -45,7 +45,7 @@ import dev.favourdevlabs.cleanthes.ui.base.AuthenticatedActivity
 import dev.favourdevlabs.cleanthes.ui.components.CleanthesPasswordField
 import dev.favourdevlabs.cleanthes.ui.components.PasswordStrengthBar
 import dev.favourdevlabs.cleanthes.ui.theme.*
-import dev.favourdevlabs.cleanthes.utils.PasswordGenerator
+import dev.favourdevlabs.cleanthes.common.PasswordGenerator
 import kotlinx.coroutines.launch
 
 // Replaces IntentIntegrator + onActivityResult — no deprecation warnings

@@ -1,4 +1,4 @@
-package dev.favourdevlabs.cleanthes.utils
+package dev.favourdevlabs.cleanthes.common
 
 import android.content.ClipData
 import android.content.ClipboardManager
